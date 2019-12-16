@@ -20,11 +20,18 @@ const getApiVersions = () => {
         }, []);
 };
 
-const getRoutePath = (baseUrl, version, directory, originalPath) => {
-    return path.join(baseUrl, version, directory, originalPath);
+const getRoutePath = (baseUrl, route) => {
+    return path.join(baseUrl, route.version, route.resource, route.path);
 };
 
-const loadRoutes = (baseUrl = '') => {
+const updateRouteDefinition = (route, version, resource) => {
+    route.version = version;
+    route.resource = resource;
+
+    return route;
+};
+
+const loadRoutes = () => {
     // Load version names
     const versions = getApiVersions();
     let apiRoutes = [];
@@ -34,17 +41,13 @@ const loadRoutes = (baseUrl = '') => {
         
         // Configure route with require
         const routes = routeFiles.map(file => {
-            const directory = getLastDirName(file);
+            const resource = getLastDirName(file);
             const module = require(file);
 
             if (Array.isArray(module)) {
-                for (const item of module) {
-                    const originalPath = item.path;
-                    item.path = getRoutePath(baseUrl, version, directory, originalPath);
-                }
+                module.forEach(route => updateRouteDefinition(route, version, resource));
             } else {
-                const originalPath = module.path;
-                module.path = getRoutePath(baseUrl, version, directory, originalPath);
+                updateRouteDefinition(module, version, resource);
             }
 
             return module;
@@ -68,8 +71,8 @@ const handleValidationResult = (req, res, next) => {
     return next(DefaultError.badRequest(req, errors));    
 };
 
-const configureRoute = (app, route) => {     
-    app[route.method](route.path, route.validationRules || [], handleValidationResult, 
+const configureRoute = (app, route, newPath) => {     
+    app[route.method](newPath, route.validationRules || [], handleValidationResult, 
         async(req, res, next) => {
             try {
                 await route.handler({ req, res, next });
@@ -82,17 +85,20 @@ const configureRoute = (app, route) => {
 
 const registerRoutes = (app, baseUrl = '') => {
     // Load routes modules for each version
-    const routes = loadRoutes(baseUrl);
+    const routes = loadRoutes();
 
     for (const route of routes) {
-        configureRoute(app, route);
+        const newPath = getRoutePath(baseUrl, route);
+
+        configureRoute(app, route, newPath);
     }
 };
 
 const publicRoutes = (baseUrl = '') => {
-    const routes = loadRoutes(baseUrl);
+    const routes = loadRoutes();
 
-    return routes.filter(route => !route.auth);
+    return routes.filter(route => !route.auth)
+        .map(route => getRoutePath(baseUrl, route));
 };
 
 module.exports = {

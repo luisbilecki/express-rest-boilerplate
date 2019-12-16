@@ -7,9 +7,11 @@ const cors = require('cors');
 const morgan = require('morgan');
 
 const logger = require('./logger');
-const { registerRoutes } = require('./routes');
+const { authMiddleware } = require('./middlewares');
+const Routes = require('./routes');
 
 const app = express();
+const baseUrl = '/api';
 
 // Protect express app with HTTP Headers
 app.use(helmet());
@@ -29,9 +31,11 @@ app.use(bodyParser.json());
 // HTTP request logger middleware
 app.use(morgan('short', { stream: logger.stream }));
 
+// Middleware authentication
+app.use(authMiddleware.unless({ path: Routes.publicRoutes(baseUrl) }));
+
 // Load app routes
-const baseUrl = '/api';
-registerRoutes(app, baseUrl);
+Routes.registerRoutes(app, baseUrl);
 
 // Add standardized error handler
 app.use(require('./errors/handler'));
