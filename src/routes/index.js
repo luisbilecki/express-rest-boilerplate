@@ -1,8 +1,8 @@
 const { flatten } = require('lodash');
 const { readdirSync } = require('fs');
+const { validationResult } = require('express-validator');
 const path = require('path');
 
-const Joi = require('joi');
 
 const { findFiles, getLastDirName } = require('../utils/files');
 const DefaultError = require('../errors/defaultError');
@@ -56,38 +56,28 @@ const loadRoutes = (baseUrl = '') => {
     return apiRoutes;
 };
 
-const validateData = (data, schema, req, next) => {
-    // Return when schema is empty
-    if (!schema) { 
-        return;
+const handleValidationResult = (req, res, next) => {
+    const errors = validationResult(req);       
+    if (errors.isEmpty()) {
+        return next();
     }
 
-    // Validate using Joi
-    const result = Joi.validate(data, schema);
-
-    if (result.error) {
-        return next(DefaultError.badRequest(req, result.error));
-    }
+    const extractedErrors = [];
+    errors.array().map(err => extractedErrors.push({ [err.param]: err.msg }));
+    
+    return next(DefaultError.badRequest(req, errors));    
 };
 
 const configureRoute = (app, route) => {     
-    app[route.method](route.path, async function(req, res, next) {
-        try {
-            // Validate path
-            validateData(req.params, route.pathSchema, req, next);
-
-            // Validate query
-            validateData(req.query, route.querySchema, req, next);
-
-            // Validate route body
-            validateData(req.body, route.bodySchema, req, next);
-
-            await route.handler({ req, res, next });
-        } catch(err) {
-            next(DefaultError.internalServerError(err));
+    app[route.method](route.path, route.validationRules || [], handleValidationResult, 
+        async(req, res, next) => {
+            try {
+                await route.handler({ req, res, next });
+            } catch(err) {
+                next(DefaultError.internalServerError(err));
+            }
         }
-    });
-
+    );
 };
 
 const registerRoutes = (app, baseUrl = '') => {

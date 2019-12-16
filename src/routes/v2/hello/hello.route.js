@@ -1,13 +1,12 @@
-const Joi = require('joi'); 
-
+const { query } = require('express-validator');
 const { HelloController } = require('../../../controllers/v2');
 
 module.exports = [{
     method: 'get',
     path: '/',
-    querySchema: Joi.object().keys({ 
-        name: Joi.string().alphanum().min(3).max(30).required(),
-    }),
+    validationRules: [
+        query('name').isLength({ min: 2, max: 30 }),
+    ],
     auth: false,
     handler: HelloController.sayHello,
 }];
