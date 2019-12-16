@@ -15,7 +15,9 @@
     "express": "^4.17.1",
     "helmet": "^3.21.2",
     "lodash": "^4.17.15",
-    "serialize-error": "^5.0.0"
+    "morgan": "^1.9.1",
+    "serialize-error": "^5.0.0",
+    "winston": "^3.2.1"
   },
   "devDependencies": {
     "eslint": "^6.7.2"

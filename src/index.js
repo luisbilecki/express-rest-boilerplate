@@ -4,6 +4,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const cors = require('cors');
+const morgan = require('morgan');
+
+const logger = require('./logger');
 
 const app = express();
 
@@ -21,6 +24,9 @@ app.use(cors(corsOptions));
 
 // Body parser middleware
 app.use(bodyParser.json());
+
+// HTTP request logger middleware
+app.use(morgan('short', { stream: logger.stream }));
 
 // TODO: load routes
 app.get('/', function(req, res, next) {
