@@ -7,6 +7,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 
 const logger = require('./logger');
+const { registerRoutes } = require('./routes');
 
 const app = express();
 
@@ -28,10 +29,9 @@ app.use(bodyParser.json());
 // HTTP request logger middleware
 app.use(morgan('short', { stream: logger.stream }));
 
-// TODO: load routes
-app.get('/', function(req, res, next) {
-    res.send('Hello World!');
-});
+// Load app routes
+const baseUrl = '/api';
+registerRoutes(app, baseUrl);
 
 // Add standardized error handler
 app.use(require('./errors/handler'));

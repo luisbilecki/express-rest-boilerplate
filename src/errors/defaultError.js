@@ -1,7 +1,19 @@
 const { serializeError } = require('serialize-error');
 
+const { isProduction } = require('../helpers/env');
+
 const getRequestPath = (req) => {
     return req.path;
+};
+
+const getErrorMessage = (err) => {
+    const serializedError = serializeError(err);
+
+    if (isProduction()) {
+        return serializedError && serializedError.message || serializedError;
+    } else {
+        return serializedError;
+    }
 };
 
 /**
@@ -12,7 +24,7 @@ class DefaultError {
     constructor(status, errName, errObj, req) {
         this.status = status;
         this.errorName = errName;
-        this.message = errObj ? serializeError(errObj) : 'No message available';
+        this.message = getErrorMessage(errObj);
         this.requestPath = req ? getRequestPath(req) : '';
         this.timestamp = Date.now();
     }    
