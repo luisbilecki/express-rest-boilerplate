@@ -23,9 +23,12 @@ app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
 // TODO: load routes
-app.get('/', function(req, res) {
+app.get('/', function(req, res, next) {
     res.send('Hello World!');
 });
+
+// Add standardized error handler
+app.use(require('./errors/handler'));
 
 // Initialize server
 const PORT = process.env.PORT || 3000;

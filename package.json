@@ -1,15 +1,21 @@
 {
   "name": "express-rest-boilerplate",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/index.js",
   "author": "Luis F. Bilecki <luis.bilecki@gmail.com>",
-  "license": "MIT",
+  "scripts": {
+    "start": "nodemon src/index.js",
+    "lint": "eslint .",
+    "test": ""
+  },
   "dependencies": {
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "helmet": "^3.21.2"
+    "helmet": "^3.21.2",
+    "lodash": "^4.17.15",
+    "serialize-error": "^5.0.0"
   },
   "devDependencies": {
     "eslint": "^6.7.2"
