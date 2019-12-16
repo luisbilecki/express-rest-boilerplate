@@ -1,8 +1,7 @@
-const { flatten } = require('lodash');
+const { flatten, get } = require('lodash');
 const { readdirSync } = require('fs');
 const { validationResult } = require('express-validator');
 const path = require('path');
-
 
 const { findFiles, getLastDirName } = require('../utils/files');
 const DefaultError = require('../errors/defaultError');
@@ -32,31 +31,24 @@ const updateRouteDefinition = (route, version, resource) => {
 };
 
 const loadRoutes = () => {
-    // Load version names
     const versions = getApiVersions();
-    let apiRoutes = [];
 
-    for (const version of versions) {
+    return versions.reduce((previous, version) => {
         const routeFiles = findFiles(path.join(routesDir, version), /(.*?)\.(route.js)$/);
         
-        // Configure route with require
         const routes = routeFiles.map(file => {
             const resource = getLastDirName(file);
             const module = require(file);
 
-            if (Array.isArray(module)) {
-                module.forEach(route => updateRouteDefinition(route, version, resource));
-            } else {
-                updateRouteDefinition(module, version, resource);
-            }
+            Array.isArray(module) ? 
+                module.forEach(route => updateRouteDefinition(route, version, resource)) : // [{ route }, { route }]
+                updateRouteDefinition(module, version, resource); // { route }
 
             return module;
         });
-        
-        apiRoutes = apiRoutes.concat(flatten(routes));
-    }
 
-    return apiRoutes;
+        return previous.concat(flatten(routes));
+    }, []);
 };
 
 const handleValidationResult = (req, res, next) => {
@@ -71,8 +63,11 @@ const handleValidationResult = (req, res, next) => {
     return next(DefaultError.badRequest(req, errors));    
 };
 
-const configureRoute = (app, route, newPath) => {     
-    app[route.method](newPath, route.validationRules || [], handleValidationResult, 
+const configureRoute = (app, baseUrl, route) => {  
+    const newPath = getRoutePath(baseUrl, route);
+    const validationRules = get(route, 'validationRules', []);
+
+    app[route.method](newPath, validationRules, handleValidationResult, 
         async(req, res, next) => {
             try {
                 await route.handler({ req, res, next });
@@ -84,20 +79,12 @@ const configureRoute = (app, route, newPath) => {
 };
 
 const registerRoutes = (app, baseUrl = '') => {
-    // Load routes modules for each version
-    const routes = loadRoutes();
-
-    for (const route of routes) {
-        const newPath = getRoutePath(baseUrl, route);
-
-        configureRoute(app, route, newPath);
-    }
+    loadRoutes()
+        .forEach(route => configureRoute(app, baseUrl, route));
 };
 
 const publicRoutes = (baseUrl = '') => {
-    const routes = loadRoutes();
-
-    return routes.filter(route => !route.auth)
+    return loadRoutes().filter(route => !route.auth)
         .map(route => getRoutePath(baseUrl, route));
 };
 
