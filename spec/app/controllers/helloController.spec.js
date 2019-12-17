@@ -1,6 +1,6 @@
 const request = require('supertest');
 
-const app = require('../../../src/index');
+const app = require('../../../app/index');
 
 describe('Hello Controller', function() {
     describe('v1', function() {
