@@ -1,5 +1,6 @@
 
 const middleware = async(req, res, next) => {
+    // TODO: Implement your authentication logic here
     console.log('Authentication middleware called!');
 
     req.user = 123;
