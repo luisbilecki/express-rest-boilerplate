@@ -20,7 +20,9 @@ const getApiVersions = () => {
 };
 
 const getRoutePath = (baseUrl, route) => {
-    return path.join(baseUrl, route.version, route.resource, route.path);
+    const routePath = route.path === '/' ? '' : route.path;
+    
+    return path.join(baseUrl, route.version, route.resource, routePath);
 };
 
 const updateRouteDefinition = (route, version, resource) => {
