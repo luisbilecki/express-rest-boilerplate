@@ -49,16 +49,16 @@ This boilerplate considers versioning in routing. To create a route or routes, p
 
 Each route file can accept an object (one route) or an array of objects (more than one route). Please see below how a route is defined:
 ```javascript
-    // route definition
-    module.exports = [{
-        method: 'get', // HTTP method: get, post, path, put, delete
-        path: '/', // route path, path params can be used
-        auth: false|true, // when this param is true, auth middleware is called
-        validationRules: [], // validation uses express-validator rules (https://express-validator.github.io/docs/)
-        handler: ({ req, res, next }) => { // route code/logic (should be a controller function)
-            res.send('Ok!');
-        },
-    }];
+// Route definition
+module.exports = [{
+    method: 'get', // HTTP method: get, post, path, put, delete
+    path: '/', // route path, path params can be used
+    auth: false|true, // when this param is true, auth middleware is called
+    validationRules: [], // validation uses express-validator rules (https://express-validator.github.io/docs/)
+    handler: ({ req, res, next }) => { // route code/logic (should be a controller function)
+        res.send('Ok!');
+    },
+}];
 ``` 
 --------------
 
