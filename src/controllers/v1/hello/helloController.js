@@ -1,5 +1,5 @@
 const sayHello = ({ res }) => {
-    res.send('Hello from v1');
+    res.json('Hello from v1');
 };
 
 module.exports = {
