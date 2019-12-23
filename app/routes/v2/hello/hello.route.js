@@ -7,6 +7,7 @@ module.exports = [{
     validationRules: [
         query('name').isLength({ min: 2, max: 30 }),
     ],
+    returnStatusCode: 200,
     auth: false,
     handler: HelloController.sayHello,
 }];

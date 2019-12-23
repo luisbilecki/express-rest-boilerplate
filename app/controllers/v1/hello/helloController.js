@@ -1,5 +1,5 @@
-const sayHello = ({ res }) => {
-    res.json('Hello from v1');
+const sayHello = () => {
+    return 'Hello from v1';
 };
 
 module.exports = {

@@ -71,8 +71,17 @@ const configureRoute = (app, baseUrl, route) => {
 
     app[route.method](newPath, validationRules, handleValidationResult, 
         async(req, res, next) => {
+            // Extract params and pass to route handler
+            const queryParams = req.query;
+            const pathParams = req.params;
+            const bodyParams = req.body;
+
             try {
-                await route.handler({ req, res, next });
+                // Get result from controller and not use res.json / send in controller
+                const result = await route.handler({ req, res, next, queryParams, pathParams, bodyParams });
+
+                res.status(route.returnStatusCode || 200);
+                res.json(result);
             } catch(err) {
                 next(DefaultError.internalServerError(err));
             }

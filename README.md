@@ -55,7 +55,8 @@ module.exports = [{
     path: '/', // route path, path params can be used
     auth: false|true, // when this param is true, auth middleware is called
     validationRules: [], // validation uses express-validator rules (https://express-validator.github.io/docs/)
-    handler: ({ req, res, next }) => { // route code/logic (should be a controller function)
+    returnStatusCode: 200, // default status code that will be returned when route is called (res.status(<code here>))
+    handler: ({ req, res, next, pathParams, bodyParams, queryParams }) => { // route code/logic (should be a controller function)
         res.send('Ok!');
     },
 }];
@@ -75,11 +76,10 @@ module.exports = [{
     validationRules: [
         query('name').isLength({ min: 2, max: 30 }),
     ],
+    returnStatusCode: 200,
     auth: false,
-    handler: ({ req, res }) => {
-        const params = req.query;
-
-        res.json(`Hello ${params.name}. V2 API is working!`);
+    handler: ({ queryParams }) => {
+        return `Hello ${queryParams.name}. V2 API is working!`;
     },
 }];
 ```
