@@ -1,7 +1,6 @@
 require('dotenv').config();
 
 const express = require('express');
-const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const cors = require('cors');
 const morgan = require('morgan');
@@ -25,8 +24,8 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// Body parser middleware
-app.use(bodyParser.json());
+// JSON Body parser middleware
+app.use(express.json());
 
 // HTTP request logger middleware
 app.use(morgan('short', { stream: logger.stream }));
